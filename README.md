@@ -1,8 +1,9 @@
 # Análise do Relatório Mundial de Felicidade (2019)
 
-**Candidato:** Leonardo Dantas Andrade de Alencar
-**Processo seletivo:** SYNAPTA | Laboratório de Dados e Inteligência Artificial, UNINASSAU Maceió (Edital nº 1/2026, Etapa 2)
-**Opção escolhida:** Opção 2, Análise do Relatório Mundial de Felicidade
+**Etapa 2 - Desafio SYNAPTA** | UNINASSAU Maceió (Edital nº 1/2026)  
+**Aluno:** Leonardo Dantas Andrade de Alencar - 01701668  
+**Opção escolhida:** Opção 2, Análise do Relatório Mundial de Felicidade  
+**Ferramentas:** Python 3, Google Colab, pandas e matplotlib
 
 ## Objetivo e pergunta orientadora
 
@@ -18,18 +19,16 @@ Analisar indicadores de felicidade de 156 países e responder:
 
 ## Colunas utilizadas
 
-O dataset é centrado na coluna `Score`. As demais colunas de fatores estimam o quanto cada fator contribui para o `Score` de cada país.
+O dataset é centrado na coluna `Score`. As outras colunas de fatores estimam o quanto cada um contribui para o `Score` de cada país.
 
 | Coluna | O que representa |
 |---|---|
-| `Country or region` | Nome do país. Cada linha é um país. |
-| `Score` | Média das notas que as pessoas dão à própria vida, numa escala de 0 a 10 (pergunta da "escada" da pesquisa Gallup World Poll). |
-| `Social support` | Estimativa de quanto o suporte social contribui para o `Score` do país. **Não** é o valor bruto do indicador. |
-| `Freedom to make life choices` | Estimativa de quanto a liberdade para fazer escolhas de vida contribui para o `Score` do país. **Não** é o valor bruto do indicador. |
+| `Country or region` | Nome do país. Cada linha é um país ou região. |
+| `Score` | Média das notas que as pessoas dão à própria vida, numa escala de 0 a 10. |
+| `Social support` | Estimativa de quanto o suporte social contribui para o `Score` do país. Não é o valor bruto do indicador. |
+| `Freedom to make life choices` | Estimativa de quanto a liberdade para fazer escolhas de vida contribui para o `Score` do país. Não é o valor bruto do indicador. |
 
-As colunas de fatores medem a contribuição em relação à "Distopia", um país hipotético com as piores médias do mundo em cada fator. Por isso o mínimo delas é 0. Um valor 0 significa que o fator contribuiu zero para o `Score` daquele país, e não que o fator não existe nele.
-
-Ao somar as seis colunas de fatores da Finlândia, o resultado foi 5,055, e não 7,769. A diferença vem do componente da Distopia e de um resíduo, que é a parte que o modelo não explica.
+As colunas de fatores medem a contribuição em relação à "Distopia", um país hipotético com as piores médias do mundo em cada fator, por isso o mínimo delas é 0. Um valor 0 significa que o fator contribuiu zero para o `Score` daquele país, e não que o fator não existe nele.
 
 ## Ferramentas
 
@@ -44,20 +43,22 @@ Ao somar as seis colunas de fatores da Finlândia, o resultado foi 5,055, e não
 3. No Colab, envie o `2019.csv` pelo painel de arquivos (ícone de pasta). O notebook lê o arquivo com `pd.read_csv('2019.csv')`.
 4. Para rodar localmente, instale as dependências com `pip install -r requirements.txt` e execute o notebook com o `2019.csv` na mesma pasta.
 5. Execute as células na ordem.
+6. O notebook salva os gráficos na própria pasta (`grafico1.png`, `grafico2.png` e `grafico3.png`). No repositório, eles estão na pasta `images/`.
 
 ## Limpeza e preparação dos dados
 
 - **Tamanho:** 156 linhas (países) e 9 colunas (`df.shape`).
-- **Valores ausentes:** nenhum (`df.isnull().sum()` deu 0 em todas as colunas).
-- **Duplicados:** nenhum, tanto na linha inteira (`df.duplicated().sum()`) quanto só pela coluna de país (`df.duplicated(subset=["Country or region"]).sum()`). A segunda checagem foi necessária porque o `Overall rank` é diferente em toda linha, então a primeira não encontraria um país repetido com dados diferentes.
-- **Inconsistências:** nenhum valor negativo; o `Score` fica entre 2,853 e 7,769, faixa coerente para uma nota de 0 a 10 (`df.describe()`).
-- **Decisão:** nenhuma alteração foi necessária nos dados.
+- **Valores ausentes:** Nenhum (`df.isnull().sum()` deu 0 em todas as colunas).
+- **Duplicados:** Nenhum, tanto na linha inteira (`df.duplicated().sum()`) quanto só pela coluna de país utilizando subset (`df.duplicated(subset=["Country or region"]).sum()`). A segunda checagem foi necessária porque o `Overall rank` é diferente em toda linha, então a primeira não encontraria um país repetido com dados diferentes.
+- **Inconsistências:** Nenhum valor negativo; o `Score` fica entre 2,853 e 7,769, faixa coerente para uma nota de 0 a 10 (`df.describe()`).
+- **Valores zero:** Cada coluna de fator tem um país com valor 0 (Somália no PIB, República Centro-Africana no suporte social, Suazilândia na expectativa de vida, Afeganistão na liberdade, Grécia na generosidade e Moldávia na percepção de corrupção). Como cada coluna é uma contribuição em relação à Distopia, 0 significa contribuição zero e não que há dados faltando, então foram mantidos.
+- **Decisão:** Nenhuma alteração foi necessária nos dados.
 
 ## Resultados
 
 ### Média e mediana do Score
 
-A média do `Score` é aproximadamente **5,407** e a mediana é **5,3795** (valores do `df.describe()`). A média representa a nota média se todos os 156 países fossem tratados igualmente. A mediana é o valor central: metade dos países está abaixo dela e metade acima.
+A média do `Score` é aproximadamente **5,407** e a mediana é **5,3795** (valores do `df.describe()`). A média representa a nota média se todos os 156 países fossem tratados igualmente. A mediana é o valor central: metade dos países está abaixo dela e metade acima. Os dois valores são muito próximos, o que indica uma distribuição equilibrada, sem países extremos puxando a média.
 
 ### Top 10 e bottom 10 (`df.nlargest` e `df.nsmallest`)
 
@@ -76,12 +77,14 @@ A média do `Score` é aproximadamente **5,407** e a mediana é **5,3795** (valo
 
 ### Correlação do Score com dois fatores
 
+Foi usada a correlação de Pearson, que mede o quanto duas variáveis variam juntas de forma linear (de -1 a 1).
+
 | Fator | Correlação com o Score |
 |---|---|
 | Suporte social | 0,777 |
 | Liberdade para fazer escolhas | 0,567 |
 
-Ambas são positivas, e o suporte social apresentou a associação mais forte. Isso contraria minha hipótese inicial, de que a liberdade acompanharia mais de perto o `Score`.
+Ambas são positivas, e o suporte social apresentou a associação mais forte entre os dois fatores analisados. Isso contraria minha hipótese inicial de que a liberdade acompanharia mais de perto o `Score`.
 
 ### Gráficos
 
@@ -89,13 +92,13 @@ Ambas são positivas, e o suporte social apresentou a associação mais forte. I
 
 ![Suporte social x Score](images/grafico1.png)
 
-Cada ponto é um país. A nuvem sobe da esquerda para a direita: países em que o suporte social contribui mais para o Score tendem a ter Score maior. Os países com Score alto ficam concentrados na faixa alta de suporte social, enquanto os de Score baixo variam bastante.
+Cada ponto é um país. A nuvem sobe da esquerda para a direita: países em que o suporte social contribui mais para o Score tendem a ter Score maior. Os países com Score alto ficam concentrados na faixa alta de suporte social, enquanto os de Score baixo variam bastante. O ponto isolado em zero, à esquerda, é a República Centro-Africana, que tem suporte social 0.
 
 **Gráfico 2: Top 10 países por Score**
 
 ![Top 10](images/grafico2.png)
 
-Gráfico de barras horizontais com os 10 países de maior Score, da Finlândia à Áustria. As barras têm tamanhos muito parecidos, o que indica que o topo do ranking é bem apertado: a diferença entre o 1º e o 10º é de cerca de 0,5 ponto.
+Gráfico de barras horizontais com os 10 países de maior Score, da Finlândia à Áustria. As barras têm tamanhos muito parecidos, o que indica que o topo do ranking é bem apertado: a diferença entre o 1º e o 10º é de cerca de 0,5 ponto. O eixo começa em 0, o que também ajuda a deixar as barras parecidas.
 
 **Gráfico 3: Liberdade para fazer escolhas x Score**
 
@@ -103,33 +106,42 @@ Gráfico de barras horizontais com os 10 países de maior Score, da Finlândia �
 
 Cada ponto é um país. A tendência também é de subida, mas a nuvem é mais espalhada que a do suporte social, o que combina com a correlação mais fraca (0,567). Para uma mesma contribuição da liberdade, os Scores variam bastante, então esse fator sozinho acompanha menos o Score.
 
+### Análise extra: por que a soma dos fatores não dá o Score?
+
+Somando as seis colunas de fatores da Finlândia, o resultado é 5,055, e não 7,769. A diferença (2,714) vem do componente da Distopia e de um resíduo, que é a parte que o modelo não explica. No notebook, a coluna `sobra` calcula essa diferença para cada país.
+
+## Tentativas e dificuldades
+
+- Minha hipótese inicial era que a liberdade para fazer escolhas teria a associação mais forte com o Score, mas os dados mostraram o contrário (0,567 contra 0,777 do suporte social).
+- Ao somar os fatores, rodei a célula mais de uma vez e a soma da Finlândia saiu 10,110 (o dobro de 5,055), porque `df.columns[3:]` passou a incluir a própria coluna `soma_fatores`. Corrigi limitando a fatia com `df.columns[3:9]`.
+
 ## Conclusões
 
-1. **O topo é dominado por países europeus, principalmente nórdicos.** Os 10 maiores Scores vão de 7,246 (Áustria) a 7,769 (Finlândia), com Dinamarca, Noruega, Islândia, Países Baixos, Suíça e Suécia entre eles. Canadá e Nova Zelândia são as exceções.
+1. **O topo é dominado por países europeus, principalmente nórdicos.** Os 10 maiores Scores vão de 7,246 (Áustria) a 7,769 (Finlândia), com Dinamarca, Noruega, Islândia, Países Baixos, Suíça e Suécia entre eles. Canadá e Nova Zelândia são as únicas exceções entre os países europeus do top 10.
 2. **A base do ranking é bem mais baixa e mais espalhada.** Os 10 menores vão de 2,853 (Sudão do Sul) a 3,597 (Haiti), uma faixa de cerca de 0,7 contra cerca de 0,5 do topo.
-3. **O suporte social tem a associação mais forte com o Score.** A correlação foi de 0,777, e no gráfico os pontos sobem da esquerda para a direita.
+3. **Entre os dois fatores analisados, o suporte social tem a associação mais forte com o Score.** A correlação foi de 0,777, e no gráfico os pontos sobem da esquerda para a direita.
 4. **A liberdade de escolhas tem associação moderada.** A correlação foi de 0,567 e a nuvem de pontos é mais espalhada. Isso contrariou minha hipótese inicial.
-5. **Há exceções à tendência.** Botsuana e Iêmen têm suporte social alto (1,145 e 1,163, respectivamente) e Score baixo (3,488 e 3,380), então um fator alto não garante um Score alto.
+5. **Há exceções à tendência.** Botsuana e Iêmen têm suporte social intermediário, abaixo da mediana de 1,27 (1,145 e 1,163, respectivamente), e Score baixo (3,488 e 3,380). Eles são exceções porque o Score deles é muito menor do que a contribuição do suporte social sugere.
 
 ## Correlação não é causa
 
-A correlação ou associação indica que dois valores têm tendência a variar juntos, mas não prova que um cause o outro. O suporte social (correlação de 0,777) pode acompanhar um Score alto sem ser a única causa da felicidade. Pode haver outros fatores influenciando os dois ao mesmo tempo, e a relação pode até ser no sentido contrário: pessoas felizes podem relatar mais suporte social.
+A correlação ou associação indica que dois valores têm tendência a variar juntos, mas não prova que um cause o outro. O suporte social (correlação de 0,777) pode acompanhar um Score alto sem ser a única causa da felicidade. Pode haver outros fatores influenciando os dois ao mesmo tempo, e a relação pode até ser no sentido contrário, pois pessoas felizes podem relatar mais suporte social.
 
 ## Limitações
 
-- **Diferenças culturais:** o Score vem de uma nota que as pessoas dão à própria vida, e culturas diferentes podem avaliar e responder de formas diferentes, o que dificulta a comparação entre países.
-- **Método de pesquisa:** o Score vem de amostras da pesquisa Gallup World Poll, e não de toda a população. As colunas dos fatores são estimativas de um modelo estatístico, e não medidas diretas.
-- **Retrato de um período:** o arquivo é referente a 2019. Não mostra mudanças ao longo do tempo, e eventos posteriores podem ter alterado o cenário. Além disso, a descrição do dataset no Kaggle é de uma edição anterior do relatório (cita amostras de 2013 a 2016 e uma coluna "Family"), então não foi usada para afirmar o período exato dos dados de 2019.
-- **Análise simples:** foi usada correlação entre duas variáveis, sem controlar outros fatores. Países como Iêmen e Botsuana mostram que há exceções.
-- **Seleção de fatores:** só foram analisados dois fatores (suporte social e liberdade). PIB per capita, expectativa de vida saudável, generosidade e percepção de corrupção ficaram de fora.
-- **Possível extensão:** analisar por continente ou região. O arquivo de 2019 não traz essa informação.
+- **Diferenças culturais:** O Score vem de uma nota que as pessoas dão à própria vida, e culturas diferentes podem avaliar e responder de formas diferentes, o que dificulta a comparação entre países.
+- **Método de pesquisa:** O Score vem de amostras da pesquisa Gallup World Poll, e não de toda a população. As colunas dos fatores são estimativas de um modelo estatístico, e não medidas diretas, então a correlação com o Score já nasce parcialmente embutida.
+- **Retrato de um período:** O arquivo é referente a 2019. Não mostra mudanças ao longo do tempo, e eventos posteriores podem ter alterado o cenário. A descrição do dataset no Kaggle é de uma edição anterior do relatório (cita amostras de 2013 a 2016 e uma coluna "Family"), então não foi usada para afirmar o período exato dos dados de 2019.
+- **Análise simples:** Foi usada correlação entre duas variáveis sem controlar outros fatores.
+- **Seleção de fatores:** Só foram analisados dois fatores (suporte social e liberdade). PIB per capita, expectativa de vida saudável, generosidade e percepção de corrupção ficaram de fora.
+- **Possível extensão:** Analisar por continente ou região enriqueceria os dados, mas o arquivo de 2019 não traz essa informação.
 
 ## Declaração de uso de inteligência artificial generativa
 
 - **Ferramenta:** Claude (Anthropic).
-- **Finalidade:** usei como tutor durante o desafio, para orientar o raciocínio, explicar conceitos (média, mediana, percentis, correlação), ajudar a interpretar mensagens de erro e sugerir rascunhos de textos (conclusões, limitações, explicações dos gráficos) e a estrutura deste README, que adaptei com minhas palavras.
-- **O que fiz sozinho:** escrevi e executei o código no Google Colab, corrigi os erros que apareceram, escolhi os fatores e fiz a hipótese inicial.
-- **Como verifiquei:** todos os números (dimensões, ausentes, duplicados, média, mediana, top 10, bottom 10 e correlações) vieram da execução do meu notebook. Os gráficos foram conferidos visualmente. A escala de 0 a 10, a origem dos dados (Gallup World Poll) e o significado das colunas de fatores foram conferidos na descrição do dataset no Kaggle.
+- **Finalidade:** Usei como tutor durante o desafio para orientar o raciocínio, explicar conceitos (média, mediana, percentis, correlação), ajudar a interpretar mensagens de erro, sugerir rascunhos de textos e revisar o projeto.
+- **O que fiz sozinho:** Escrevi e executei todo o código no Google Colab, depurei os erros que apareceram, escolhi os dois fatores analisados e fiz a hipótese inicial. Solicitei ajuda para melhor compreender os conceitos e reescrevi os textos do README e do notebook com minha própria redação, conferindo cada número no meu notebook.
+- **Como verifiquei:** Todos os números (dimensões, ausentes, duplicados, valores zero, média, mediana, top 10, bottom 10 e correlações) vieram da execução do meu notebook. O dataset e os gráficos foram conferidos visualmente. A escala de 0 a 10, a origem dos dados (Gallup World Poll) e o significado das colunas de fatores foram conferidos na descrição do dataset no Kaggle.
 
 ## Estrutura do repositório
 
